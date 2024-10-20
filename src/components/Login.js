@@ -8,8 +8,8 @@ const Login = ({ setToken }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
-            setToken(response.data.token);
+            const response = await axios.post('http://localhost:3000/employee/login', { username, password });
+            setToken(response.data.accessToken);
         } catch (error) {
             console.error('Login failed', error);
         }

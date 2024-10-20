@@ -8,7 +8,7 @@ const UserList = ({ token, onSelectUser }) => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/users', {
+                const response = await axios.get('http://localhost:3000/employee/list', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setUsers(response.data);
@@ -19,7 +19,7 @@ const UserList = ({ token, onSelectUser }) => {
 
         fetchUsers();
 
-        const socket = io('http://localhost:5000', {
+        const socket = io('http://localhost:3000', {
             auth: { token }
         });
 
