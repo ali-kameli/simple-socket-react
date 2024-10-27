@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import axios from "axios";
 
-const Ticket = ({ token, receiverId, onBack }) => {
+const Support = ({ token, receiverId, onBack }) => {
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -10,7 +10,7 @@ const Ticket = ({ token, receiverId, onBack }) => {
   const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3000", {
+    const newSocket = io("http://localhost:5000", {
       auth: { token },
     });
     setSocket(newSocket);
@@ -134,4 +134,4 @@ const Ticket = ({ token, receiverId, onBack }) => {
   );
 };
 
-export default Ticket;
+export default Support;

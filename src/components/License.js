@@ -21,11 +21,9 @@ const License = ({ token, receiverId, onBack }) => {
       console.log("Connected to socket with id:", newSocket.id);
     });
 
-    // دریافت پیام‌های جدید از سوکت و اضافه کردن آن‌ها به لیست پیام‌ها
     newSocket.on("license", (data) => {
       console.log("Received new message:", data);
-      console.log("from:", data.from);
-      setMessages((prevMessages) => [...prevMessages, data]);
+      setMessages((prevMessages) => [...prevMessages, data]); // این خط برای به‌روزرسانی وضعیت استفاده می‌شود
     });
 
     return () => {
@@ -35,7 +33,6 @@ const License = ({ token, receiverId, onBack }) => {
 
   useEffect(() => {
     if (socket && receiverId) {
-      // دریافت اطلاعات کاربر فعلی
       axios
         .get("http://localhost:3000/employee/get-profile", {
           headers: { Authorization: `Bearer ${token}` },
@@ -44,7 +41,6 @@ const License = ({ token, receiverId, onBack }) => {
           const userId = response.data.employee.id;
           setUserId(userId);
 
-          // ایجاد RoomId بر اساس شناسه‌های کاربران
           const newRoomId =
             userId < receiverId
               ? `${userId}_${receiverId}`
@@ -54,11 +50,11 @@ const License = ({ token, receiverId, onBack }) => {
 
           // دریافت پیام‌های قبلی
           axios
-            .get(`http://localhost:3000/ticket/messages/${newRoomId}`, {
+            .get(`http://localhost:3000/manager/license/temp/socket-manager-requests/${newRoomId}`, {
               headers: { Authorization: `Bearer ${token}` },
             })
             .then((response) => {
-              setMessages(response.data);
+              setMessages(response.data); // پیام‌های قبلی را در وضعیت قرار می‌دهیم
             })
             .catch((error) => {
               console.error("Error fetching messages", error);
@@ -73,30 +69,36 @@ const License = ({ token, receiverId, onBack }) => {
   const sendMessage = (e) => {
     e.preventDefault();
     if (socket && message && receiverId && roomId) {
-      // ایجاد پیام جدید محلی قبل از ارسال به سرور
-      const newMessage = {
-        senderId: userId,
-        ticket_content: message,
-        license_type,
-        account_number,
-        category: "license", // اضافه کردن دسته‌بندی پیام
-      };
+      axios
+        .post(
+          "http://localhost:3000/manager/license/temp/send-request",
+          {
+            employee_description: message,
+            license_type,
+            account_number,
+            receiverId,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+        .then((response) => {
+          console.log("Request and ticket created:", response.data);
+        })
+        .catch((error) => {
+          console.error("Error creating request and ticket:", error);
+        });
 
-      // اضافه کردن پیام به لیست پیام‌ها بلافاصله پس از ارسال
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-
-      // ارسال پیام به سوکت سرور
+      // ارسال پیام به سرور
       socket.emit("license", {
         content: message,
         to: receiverId,
         roomId,
         license_type,
         account_number,
-        category: "license", // ارسال دسته‌بندی به سوکت
       });
 
-      // پاک کردن فیلد ورودی پس از ارسال
-      setMessage("");
+      setMessage(""); // پاک کردن فیلد ورودی
     }
   };
 
